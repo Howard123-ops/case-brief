@@ -1,0 +1,475 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Case Brief</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&display=swap">
+<style>
+/* Same look as Brief & Hypo: a plain white case file. Cartoon on top, then the case-name form, then the brief. */
+:root {
+  --bg: #FFFFFF; --tint: #F6F7F9; --ink: #111827; --muted: #5B6472;
+  --line: #E3E6EB; --line-strong: #C9CED6;
+  --accent: #1B365D; --accent-ink: #FFFFFF; --accent-soft: #EDF1F7;
+  --danger: #A12C2C; --danger-soft: #FCEEEE;
+  --display: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --body: "Public Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --radius: 6px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--ink); margin: 0;
+  font-family: var(--body); font-size: 15px; line-height: 1.6;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2 { text-wrap: balance; margin: 0; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.card { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); }
+
+.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 24px; padding-block: 26px 16px; border-bottom: 1px solid var(--line); }
+.brand { font-family: var(--display); font-weight: 600; font-size: 26px; letter-spacing: -.01em; color: var(--accent); }
+.tagline { color: var(--muted); font-size: 14px; }
+
+/* Cartoon */
+.cartoon { overflow: hidden; }
+.cartoon-art { display: block; width: 100%; height: auto; aspect-ratio: 12 / 5; background: var(--tint); }
+.cartoon-wait { display: flex; align-items: center; justify-content: center; gap: 10px; aspect-ratio: 12 / 5; max-height: 380px; width: 100%; background: var(--tint); color: var(--muted); font-size: 14px; text-align: center; padding: 16px; }
+.cartoon-wait.err { color: var(--danger); background: var(--danger-soft); }
+.cartoon-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+.cartoon-bar .btn { padding: 5px 12px; font-size: 13px; }
+
+/* Form */
+.intake { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 16px; }
+.intake .input { flex: 1 1 260px; min-width: 0; border: 1px solid var(--line-strong); border-radius: var(--radius); padding: 10px 12px; }
+.intake .input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+.examples { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--muted); }
+.chip-btn { border: 0; background: none; padding: 0; font-style: italic; font-family: var(--display); font-size: 14px; cursor: pointer; color: var(--accent); text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
+.chip-btn:hover { text-decoration-color: var(--accent); }
+.form-error { flex-basis: 100%; color: var(--danger); font-size: 13px; margin: 0; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: var(--radius); padding: 10px 18px; font-weight: 600; font-size: 14px; cursor: pointer; border: 1px solid transparent; }
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { background: #142a49; }
+.btn-ghost { background: var(--bg); border-color: var(--line-strong); color: var(--ink); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* Recent */
+.recent { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 13px; color: var(--muted); }
+.recent-item { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding-left: 10px; }
+.recent-open { border: 0; background: none; cursor: pointer; font-family: var(--display); font-style: italic; font-size: 14px; color: var(--ink); padding: 2px 0; }
+.recent-open.active { color: var(--accent); font-weight: 600; }
+.recent-del { border: 0; background: none; cursor: pointer; color: var(--muted); font-size: 16px; line-height: 1; padding: 2px 8px; border-radius: 999px; }
+.recent-del:hover { color: var(--danger); }
+
+/* Status */
+.status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; font-size: 13.5px; color: var(--muted); }
+.status:empty { display: none; }
+.pill { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: var(--tint); border: 1px solid var(--line); }
+.pill.live { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.pill.err { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+.status .msg { flex: 1; min-width: 200px; }
+.spinner { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--accent-soft); border-top-color: var(--accent); animation: spin .8s linear infinite; display: inline-block; vertical-align: -2px; margin-right: 6px; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+
+/* Brief */
+.brief { padding: 30px 32px 12px; }
+@media (max-width: 560px) { .brief { padding: 20px 18px 6px; } }
+.caption { padding-bottom: 18px; border-bottom: 1px solid var(--ink); display: flex; flex-direction: column; gap: 8px; }
+.case-name { font-family: var(--display); font-style: italic; font-weight: 600; font-size: clamp(24px, 3.4vw, 32px); line-height: 1.2; letter-spacing: -.01em; }
+.case-meta { font-family: var(--mono); font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.case-meta b { color: var(--ink); font-weight: 500; }
+.sec { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 6px 28px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.sec:last-child { border-bottom: 0; }
+@media (max-width: 640px) { .sec { grid-template-columns: minmax(0, 1fr); } }
+.sec-label { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); padding-top: 3px; }
+.sec-body { min-width: 0; max-width: 68ch; }
+.sec-body p { margin: 0 0 .75em; }
+.sec-body p:last-child, .sec-body ul:last-child { margin-bottom: 0; }
+.sec-body ul, .sec-body ol { margin: 0 0 .75em; padding-left: 1.25em; }
+.sec-body li { margin-bottom: .35em; }
+.sec.holding { background: var(--tint); margin-inline: -16px; padding-inline: 16px; border-bottom-color: transparent; border-radius: 4px; }
+.sec.holding .sec-body { font-weight: 500; }
+.sec.pending .sec-body { color: var(--muted); }
+.skel { display: block; height: 10px; border-radius: 3px; background: var(--line); margin: 6px 0 10px; }
+.skel.s2 { width: 82%; } .skel.s3 { width: 64%; }
+.notfound { padding: 26px 32px; display: flex; flex-direction: column; gap: 8px; }
+.notfound h2 { font-family: var(--display); font-size: 22px; }
+.notfound p { margin: 0; color: var(--muted); }
+.foot { padding-top: 14px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); max-width: 80ch; margin: 0; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Case Brief</div>
+    <div class="tagline">Type a case name. Get the facts, procedural history, holding and rationale, plus a cartoon.</div>
+  </header>
+
+  <figure class="card cartoon" id="cartoon" style="margin:0" hidden>
+    <div id="cartoon-view"></div>
+    <figcaption class="cartoon-bar">
+      <span>A cartoon of the facts, drawn by a free AI model. It's for fun and may get details wrong.</span>
+      <button class="btn btn-ghost" id="cartoon-redraw" type="button">Redraw</button>
+    </figcaption>
+  </figure>
+
+  <form class="card intake" id="intake" novalidate>
+    <label for="case-name" class="sr" hidden>Case name</label>
+    <input class="input" id="case-name" type="text" placeholder="Case name, e.g. Hadley v. Baxendale" autocomplete="off" aria-label="Case name">
+    <button class="btn btn-primary" id="go" type="submit">Brief this case</button>
+    <div class="examples"><span>Try</span>
+      <button type="button" class="chip-btn" data-example="Palsgraf v. Long Island Railroad Co.">Palsgraf</button>
+      <button type="button" class="chip-btn" data-example="Marbury v. Madison">Marbury v. Madison</button>
+      <button type="button" class="chip-btn" data-example="Hawkins v. McGee">Hawkins v. McGee</button>
+      <button type="button" class="chip-btn" data-example="Pierson v. Post">Pierson v. Post</button>
+    </div>
+    <p class="form-error" id="form-error" role="alert" hidden></p>
+  </form>
+
+  <div class="recent" id="recent" hidden></div>
+  <div class="status" id="status" aria-live="polite"></div>
+
+  <article class="card brief" id="brief" hidden>
+    <header class="caption">
+      <h1 class="case-name" id="cap-name"></h1>
+      <div class="case-meta" id="cap-meta"></div>
+    </header>
+    <div id="sections"></div>
+  </article>
+
+  <article class="card notfound" id="notfound" hidden>
+    <h2>Couldn't identify that case</h2>
+    <p id="notfound-msg"></p>
+  </article>
+
+  <p class="foot">Briefs and cartoons are written by a free AI model (via OpenRouter) and can contain mistakes, especially citations and procedural details. Check them against the opinion before you rely on them.</p>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const SECTIONS = [
+    ["FACTS", "Facts"],
+    ["PROCEDURAL_HISTORY", "Procedural history"],
+    ["HOLDING", "Holding", "holding"],
+    ["RATIONALE", "Rationale"],
+  ];
+  // Locally, server.py serves this page and answers /api/ai. On GitHub Pages there is no server,
+  // so requests go to the Cloudflare Worker in worker/worker.js, which holds the OpenRouter key.
+  const WORKER_URL = "";
+  const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  const API_URL = LOCAL || !WORKER_URL ? "/api/ai" : WORKER_URL.replace(/\/+$/, "") + "/api/ai";
+  const HISTORY_KEY = "casebrief.history.v1";
+  const STALL_MS = 90000, MAX_MS = 240000;
+
+  /* ---------- AI: talks to our own server, which holds the OpenRouter key ---------- */
+  function aiError(code, message, text) { return Object.assign(new Error(message || code), { code, text }); }
+  function codeForStatus(s) {
+    if (s === 401 || s === 403) return "auth";
+    if (s === 402) return "credits";
+    if (s === 429) return "rate_limited";
+    if (s >= 500) return "busy";
+    return "bad_request";
+  }
+  async function ask(payload, { signal, onText, onThinking, maxMs = MAX_MS } = {}) {
+    const ctl = new AbortController();
+    let timedOut = false, stall = null, text = "", finish = null;
+    const arm = () => { clearTimeout(stall); stall = setTimeout(() => { timedOut = true; ctl.abort(); }, STALL_MS); };
+    const max = setTimeout(() => { timedOut = true; ctl.abort(); }, maxMs);
+    const onAbort = () => ctl.abort();
+    signal?.addEventListener("abort", onAbort);
+    try {
+      arm();
+      const res = await fetch(API_URL, { method: "POST", signal: ctl.signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      if (!res.ok) {
+        let detail = ""; try { detail = (await res.json())?.error?.message || ""; } catch {}
+        throw aiError(codeForStatus(res.status), detail || `HTTP ${res.status}`);
+      }
+      const reader = res.body.getReader(), dec = new TextDecoder();
+      let buf = "";
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        arm();
+        buf += dec.decode(value, { stream: true });
+        let nl;
+        while ((nl = buf.indexOf("\n")) >= 0) {
+          const line = buf.slice(0, nl).trim(); buf = buf.slice(nl + 1);
+          if (!line.startsWith("data:")) continue; // skips keep-alive comments
+          const data = line.slice(5).trim();
+          if (data === "[DONE]") continue;
+          let j; try { j = JSON.parse(data); } catch { continue; }
+          if (j.error) throw aiError(codeForStatus(Number(j.error.code) || 500), j.error.message, text);
+          const ch = j.choices?.[0];
+          if (ch?.delta?.content) { text += ch.delta.content; onText?.(text); }
+          else if (ch?.delta?.reasoning && !text) onThinking?.();
+          if (ch?.finish_reason) finish = ch.finish_reason;
+        }
+      }
+      if (!text.trim()) throw aiError("empty", "", text);
+      return { text, truncated: finish === "length" };
+    } catch (e) {
+      if (e?.name === "AbortError") throw aiError(timedOut ? "timeout" : "cancelled", "", text);
+      if (e?.code) { e.text ??= text; throw e; }
+      throw aiError("network", e?.message, text);
+    } finally {
+      clearTimeout(stall); clearTimeout(max); signal?.removeEventListener("abort", onAbort);
+    }
+  }
+  function errorCopy(e) {
+    const base = {
+      cancelled: null,
+      busy: "The free AI model is busy or unavailable right now. Wait a moment, then try again.",
+      timeout: "The free AI model is taking too long. Try again in a minute.",
+      rate_limited: "The free AI model's rate limit was reached. Wait a minute or two, then try again.",
+      auth: "The AI service rejected the API key on the server.",
+      credits: "The AI service account is out of credits.",
+      empty: "The AI model returned an empty answer. Try again, or give the full case name.",
+      network: "Couldn't reach the app's AI server. Check your internet connection, then try again.",
+    }[e?.code];
+    if (base === null) return null;
+    const msg = base || "The AI request failed. Try again in a moment.";
+    const detail = e?.message && e.message !== e.code ? ` (${e.message.slice(0, 160)})` : "";
+    return msg + (e?.text ? " Anything already written is kept." : "") + detail;
+  }
+
+  /* ---------- Text helpers ---------- */
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const inline = (s) => esc(s)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*])\*(?!\s)(.+?)\*(?!\*)/g, "$1<em>$2</em>");
+  function md(src) {
+    let html = "", para = [], list = null;
+    const fp = () => { if (para.length) { html += "<p>" + para.map(inline).join("<br>") + "</p>"; para = []; } };
+    const fl = () => { if (list) { html += `<${list.tag}>${list.items.map((i) => "<li>" + inline(i) + "</li>").join("")}</${list.tag}>`; list = null; } };
+    for (const raw of src.replace(/\r/g, "").split("\n")) {
+      const line = raw.trim();
+      const ul = line.match(/^[-*•]\s+(.*)/), ol = line.match(/^\d+[.)]\s+(.*)/);
+      if (!line) { fp(); fl(); continue; }
+      if (ul || ol) {
+        fp(); const tag = ul ? "ul" : "ol";
+        if (!list || list.tag !== tag) { fl(); list = { tag, items: [] }; }
+        list.items.push((ul || ol)[1]); continue;
+      }
+      fl(); para.push(line.replace(/^#+\s*/, ""));
+    }
+    fp(); fl();
+    return html;
+  }
+  function parseSections(text) {
+    const out = {}, marks = [], re = /^[ \t]*\[\[([A-Z_]+)\]\][ \t]*$/gm;
+    let m;
+    while ((m = re.exec(text))) marks.push({ key: m[1], start: m.index, end: re.lastIndex });
+    marks.forEach((mk, i) => {
+      let body = text.slice(mk.end, marks[i + 1] ? marks[i + 1].start : text.length);
+      if (!marks[i + 1]) body = body.replace(/\n?\s*\[\[?[A-Z_]*\]?$/, ""); // half-streamed marker
+      out[mk.key] = body.trim();
+    });
+    return out;
+  }
+  function parseCaption(s) {
+    const c = {};
+    (s || "").split("\n").forEach((l) => { const m = l.match(/^\s*([A-Za-z]+)\s*:\s*(.+)$/); if (m) c[m[1].toLowerCase()] = m[2].trim(); });
+    return c;
+  }
+  const known = (v) => v && !/^unknown/i.test(v) ? v : "";
+  const store = {
+    get() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch { return []; } },
+    set(v) { try { localStorage.setItem(HISTORY_KEY, JSON.stringify(v)); } catch {} },
+  };
+
+  /* ---------- State ---------- */
+  let current = null;       // { id, label, briefText, cartoon }
+  let busy = false, thinking = false, ctl = null, timer = null, startedAt = 0;
+  let lastError = null, renderQueued = false;
+  let cartoonCtl = null, cartoonError = null, cartoonProgress = "";
+
+  const skeleton = '<span class="skel"></span><span class="skel s2"></span><span class="skel s3"></span>';
+  $("sections").innerHTML = SECTIONS.map(([k, label, cls]) =>
+    `<section class="sec ${cls || ""}" id="sec-${k}"><div class="sec-label">${label}</div><div class="sec-body" id="body-${k}"></div></section>`).join("");
+
+  /* ---------- Rendering ---------- */
+  function queueRender() { if (!renderQueued) { renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); } }
+  function render() {
+    const s = parseSections(current?.briefText || "");
+    const notFound = s.NOT_FOUND !== undefined;
+    $("brief").hidden = !current || notFound;
+    $("notfound").hidden = !notFound;
+    if (notFound) $("notfound-msg").textContent = s.NOT_FOUND || "Try the full case name.";
+    if (current && !notFound) {
+      const cap = parseCaption(s.CAPTION);
+      $("cap-name").textContent = cap.name || current.label;
+      $("cap-meta").innerHTML = [
+        known(cap.court) && `<span><b>${esc(cap.court)}</b></span>`,
+        known(cap.citation) ? `<span>${esc(cap.citation)}</span>` : known(cap.year) && `<span>${esc(cap.year)}</span>`,
+        known(cap.judge) && `<span>Opinion by ${esc(cap.judge)}</span>`,
+      ].filter(Boolean).join("");
+      for (const [k] of SECTIONS) {
+        const waiting = busy && !s[k];
+        $("sec-" + k).classList.toggle("pending", waiting);
+        $("sec-" + k).hidden = !s[k] && !busy;
+        $("body-" + k).innerHTML = s[k] ? md(s[k]) : waiting ? skeleton : "";
+      }
+    }
+    $("go").disabled = busy;
+    $("go").textContent = busy ? "Briefing…" : "Brief this case";
+    renderStatus(); renderHistory(); renderCartoon();
+  }
+  function renderStatus() {
+    const el = $("status");
+    if (busy) {
+      const secs = Math.round((Date.now() - startedAt) / 1000);
+      el.innerHTML = `<span class="pill live">Working</span><span class="msg"><span class="spinner" aria-hidden="true"></span>${thinking ? "The free model is thinking before it writes. This can take a minute" : "Writing your brief"} · ${secs}s</span><button class="btn btn-ghost" id="stop" type="button">Stop</button>`;
+      $("stop").onclick = () => ctl?.abort();
+    } else if (lastError) {
+      el.innerHTML = `<span class="pill err">Problem</span><span class="msg">${esc(lastError)}</span>`;
+    } else el.innerHTML = "";
+  }
+  function renderHistory() {
+    const items = store.get();
+    $("recent").hidden = !items.length;
+    $("recent").innerHTML = "<span>Recent:</span>" + items.map((h) => `<span class="recent-item">
+      <button type="button" class="recent-open ${h.id === current?.id ? "active" : ""}" data-open="${esc(h.id)}">${esc(h.title)}</button>
+      <button type="button" class="recent-del" data-del="${esc(h.id)}" aria-label="Remove ${esc(h.title)}">×</button></span>`).join("");
+  }
+  function saveCurrent() {
+    const s = parseSections(current?.briefText || "");
+    if (!current || s.NOT_FOUND !== undefined || !s.FACTS) return;
+    const entry = { id: current.id, title: parseCaption(s.CAPTION).name || current.label, label: current.label, briefText: current.briefText, cartoon: current.cartoon || null };
+    store.set([entry, ...store.get().filter((h) => h.id !== entry.id)].slice(0, 15));
+  }
+
+  /* ---------- Cartoon ---------- */
+  function cleanSvg(raw) {
+    const m = (raw || "").match(/<svg[\s\S]*<\/svg>/i);
+    if (!m) return null;
+    let svg = m[0].replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, "").replace(/\son\w+\s*=\s*("[^"]*"|'[^']*')/gi, "");
+    if (!/xmlns=/.test(svg)) svg = svg.replace(/<svg/i, '<svg xmlns="http://www.w3.org/2000/svg"');
+    const doc = new DOMParser().parseFromString(svg, "image/svg+xml");
+    if (doc.querySelector("parsererror")) return null;
+    const root = doc.documentElement;
+    if (!root.getAttribute("viewBox")) root.setAttribute("viewBox", `0 0 ${parseFloat(root.getAttribute("width")) || 1200} ${parseFloat(root.getAttribute("height")) || 500}`);
+    root.removeAttribute("width"); root.removeAttribute("height");
+    return new XMLSerializer().serializeToString(root);
+  }
+  async function drawCartoon() {
+    const s = parseSections(current?.briefText || "");
+    if (!current || s.NOT_FOUND !== undefined || !s.FACTS) return;
+    cartoonCtl?.abort();
+    const c = new AbortController(); cartoonCtl = c;
+    const target = current;
+    target.cartoon = null; cartoonError = null; renderCartoon();
+    try {
+      // The free router sometimes picks a model that can't draw; give it one more try.
+      let svg = null;
+      for (let attempt = 0; attempt < 2 && !svg; attempt++) {
+        cartoonProgress = attempt ? "Retrying with another model…" : ""; renderCartoon();
+        const { text } = await ask({ kind: "cartoon", name: parseCaption(s.CAPTION).name || target.label, facts: s.FACTS }, {
+          signal: c.signal, maxMs: 150000,
+          onThinking: () => { if (target === current && !cartoonProgress.startsWith("Thinking")) { cartoonProgress = "Thinking about the scene…"; renderCartoon(); } },
+          onText: (t) => { if (target !== current) return; const p = `Drawing… ${Math.min(99, Math.round(t.length / 80))}%`; if (p !== cartoonProgress) { cartoonProgress = p; renderCartoon(); } },
+        });
+        svg = cleanSvg(text);
+      }
+      if (!svg) throw aiError("bad_svg", "The model's drawing came back broken. Try Redraw.");
+      target.cartoon = svg;
+      if (target === current) saveCurrent();
+      else store.set(store.get().map((h) => h.id === target.id ? { ...h, cartoon: svg } : h));
+    } catch (err) {
+      if (target === current && err?.code !== "cancelled") cartoonError = err?.code === "bad_svg" ? err.message : errorCopy(err);
+    } finally {
+      if (cartoonCtl === c) { cartoonCtl = null; cartoonProgress = ""; }
+      renderCartoon();
+    }
+  }
+  function renderCartoon() {
+    const box = $("cartoon"), view = $("cartoon-view");
+    const s = parseSections(current?.briefText || "");
+    const show = !!current && s.NOT_FOUND === undefined && (busy || !!s.FACTS);
+    box.hidden = !show;
+    if (!show) return;
+    $("cartoon-redraw").disabled = !!cartoonCtl || busy;
+    $("cartoon-redraw").textContent = current.cartoon ? "Redraw" : "Draw cartoon";
+    if (current.cartoon) {
+      const src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(current.cartoon);
+      if (view.dataset.src !== src) {
+        view.dataset.src = src;
+        view.innerHTML = `<img class="cartoon-art" alt="Cartoon of the facts of ${esc(current.label)}" src="${src}">`;
+      }
+      return;
+    }
+    view.dataset.src = "";
+    view.innerHTML = cartoonError
+      ? `<div class="cartoon-wait err" role="alert">Couldn't draw the cartoon. ${esc(cartoonError)}</div>`
+      : cartoonCtl || busy
+        ? `<div class="cartoon-wait"><span class="spinner" aria-hidden="true"></span>${busy ? "The cartoon is drawn once the facts are written…" : esc(cartoonProgress || "Drawing a cartoon of the facts…")}</div>`
+        : `<div class="cartoon-wait">No cartoon for this brief yet.</div>`;
+  }
+
+  /* ---------- Brief ---------- */
+  async function runBrief(e) {
+    e?.preventDefault();
+    if (busy) return;
+    const name = $("case-name").value.trim();
+    $("form-error").hidden = name.length >= 3;
+    if (name.length < 3) { $("form-error").textContent = "Type a case name, like Hadley v. Baxendale."; return; }
+    cartoonCtl?.abort(); cartoonError = null;
+    current = { id: Date.now().toString(36), label: name, briefText: "", cartoon: null };
+    busy = true; thinking = false; lastError = null; startedAt = Date.now();
+    ctl = new AbortController();
+    clearInterval(timer); timer = setInterval(renderStatus, 1000);
+    render();
+    try {
+      // The free router sometimes picks a model that ignores the [[SECTION]] format; retry once.
+      for (let attempt = 0; attempt < 2; attempt++) {
+        current.briefText = "";
+        const { text, truncated } = await ask({ kind: "brief", case: name }, {
+          signal: ctl.signal,
+          onThinking: () => { if (!thinking) { thinking = true; renderStatus(); } },
+          onText: (t) => { thinking = false; current.briefText = t; queueRender(); },
+        });
+        current.briefText = text;
+        const s = parseSections(text);
+        lastError = s.FACTS || s.NOT_FOUND !== undefined ? null : "The AI model's answer didn't come back in brief format. Try again.";
+        if (!lastError) { if (truncated) lastError = "The answer was cut short. Try again."; break; }
+      }
+    } catch (err) {
+      current.briefText = err?.text ?? current.briefText;
+      lastError = errorCopy(err);
+    } finally {
+      busy = false; thinking = false; clearInterval(timer); ctl = null;
+      saveCurrent(); render();
+    }
+    drawCartoon();
+  }
+
+  /* ---------- Wiring ---------- */
+  $("intake").addEventListener("submit", runBrief);
+  $("cartoon-redraw").addEventListener("click", drawCartoon);
+  document.querySelectorAll("[data-example]").forEach((b) => b.addEventListener("click", () => { $("case-name").value = b.dataset.example; runBrief(); }));
+  $("recent").addEventListener("click", (e) => {
+    if (busy) return;
+    const open = e.target.closest("[data-open]"), del = e.target.closest("[data-del]");
+    if (open) {
+      const h = store.get().find((x) => x.id === open.dataset.open);
+      if (!h) return;
+      cartoonCtl?.abort(); cartoonError = null; lastError = null;
+      current = { id: h.id, label: h.label, briefText: h.briefText, cartoon: h.cartoon || null };
+      render();
+    } else if (del) {
+      store.set(store.get().filter((x) => x.id !== del.dataset.del));
+      if (current?.id === del.dataset.del) { cartoonCtl?.abort(); current = null; }
+      render();
+    }
+  });
+  const first = store.get()[0];
+  if (first) current = { id: first.id, label: first.label, briefText: first.briefText, cartoon: first.cartoon || null };
+  render();
+})();
+</script>
