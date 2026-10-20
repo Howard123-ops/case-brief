@@ -162,7 +162,7 @@ button, input { font: inherit; color: inherit; }
   ];
   // Locally, server.py serves this page and answers /api/ai. On GitHub Pages there is no server,
   // so requests go to the Cloudflare Worker in worker/worker.js, which holds the OpenRouter key.
-  const WORKER_URL = "";
+  const WORKER_URL = "https://case-brief.maliwei18.workers.dev";
   const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   const API_URL = LOCAL || !WORKER_URL ? "/api/ai" : WORKER_URL.replace(/\/+$/, "") + "/api/ai";
   const HISTORY_KEY = "casebrief.history.v1";
