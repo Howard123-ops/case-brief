@@ -278,6 +278,8 @@ button, input { font: inherit; color: inherit; }
     (s || "").split("\n").forEach((l) => { const m = l.match(/^\s*([A-Za-z]+)\s*:\s*(.+)$/); if (m) c[m[1].toLowerCase()] = m[2].trim(); });
     return c;
   }
+  // Some models write a full brief and then tack on a NOT_FOUND caveat; only a reply with no facts counts as not found.
+  const isNotFound = (s) => s.NOT_FOUND !== undefined && !s.FACTS;
   const known = (v) => v && !/^unknown/i.test(v) ? v : "";
   const store = {
     get() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch { return []; } },
@@ -298,7 +300,7 @@ button, input { font: inherit; color: inherit; }
   function queueRender() { if (!renderQueued) { renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); } }
   function render() {
     const s = parseSections(current?.briefText || "");
-    const notFound = s.NOT_FOUND !== undefined;
+    const notFound = isNotFound(s);
     $("brief").hidden = !current || notFound;
     $("notfound").hidden = !notFound;
     if (notFound) $("notfound-msg").textContent = s.NOT_FOUND || "Try the full case name.";
@@ -340,7 +342,7 @@ button, input { font: inherit; color: inherit; }
   }
   function saveCurrent() {
     const s = parseSections(current?.briefText || "");
-    if (!current || s.NOT_FOUND !== undefined || !s.FACTS) return;
+    if (!current || isNotFound(s) || !s.FACTS) return;
     const entry = { id: current.id, title: parseCaption(s.CAPTION).name || current.label, label: current.label, briefText: current.briefText, cartoon: current.cartoon || null };
     store.set([entry, ...store.get().filter((h) => h.id !== entry.id)].slice(0, 15));
   }
@@ -360,7 +362,7 @@ button, input { font: inherit; color: inherit; }
   }
   async function drawCartoon() {
     const s = parseSections(current?.briefText || "");
-    if (!current || s.NOT_FOUND !== undefined || !s.FACTS) return;
+    if (!current || isNotFound(s) || !s.FACTS) return;
     cartoonCtl?.abort();
     const c = new AbortController(); cartoonCtl = c;
     const target = current;
@@ -391,7 +393,7 @@ button, input { font: inherit; color: inherit; }
   function renderCartoon() {
     const box = $("cartoon"), view = $("cartoon-view");
     const s = parseSections(current?.briefText || "");
-    const show = !!current && s.NOT_FOUND === undefined && (busy || !!s.FACTS);
+    const show = !!current && !isNotFound(s) && (busy || !!s.FACTS);
     box.hidden = !show;
     if (!show) return;
     $("cartoon-redraw").disabled = !!cartoonCtl || busy;
